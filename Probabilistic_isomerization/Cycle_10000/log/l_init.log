@@ -1,0 +1,75 @@
+units		real
+boundary	p p p
+atom_style	full
+
+# Define styles
+pair_style lj/class2/coul/long 10
+#pair_style lj/class2 10
+bond_style class2
+angle_style class2
+dihedral_style class2
+improper_style class2
+
+kspace_style ewald 1.0e-4
+
+# Read in the azobenzene polymer chain lammps datafile
+read_data	M10D1A1_C25_eq2_t0.data
+Reading data file ...
+  orthogonal box = (0.081032911 1.2125424 -1.2365250) to (42.360467 41.228958 43.678025)
+  2 by 2 by 2 MPI processor grid
+  reading atoms ...
+  7278 atoms
+  reading velocities ...
+  7278 velocities
+  scanning bonds ...
+  4 = max bonds/atom
+  scanning angles ...
+  6 = max angles/atom
+  scanning dihedrals ...
+  32 = max dihedrals/atom
+  scanning impropers ...
+  4 = max impropers/atom
+  reading bonds ...
+  7444 bonds
+  reading angles ...
+  12940 angles
+  reading dihedrals ...
+  17334 dihedrals
+  reading impropers ...
+  6520 impropers
+Finding 1-2 1-3 1-4 neighbors ...
+  special bond factors lj:    0        0        0       
+  special bond factors coul:  0        0        0       
+     4 = max # of 1-2 neighbors
+    11 = max # of 1-3 neighbors
+    19 = max # of 1-4 neighbors
+    23 = max # of special neighbors
+  special bonds CPU = 0.001 seconds
+  read_data CPU = 0.066 seconds
+group nitrogen type 2
+43 atoms in group nitrogen
+
+variable p internal 0.0
+variable cos equal cos(v_p)
+variable cossq equal cos(v_p)*cos(v_p)
+
+compute 1 all property/local datom1 datom2 datom3 datom4 dtype
+compute 2 all dihedral/local phi v_cos v_cossq set phi p
+
+dump 1 all local 10 dump/dihed_*.dat c_1[*] c_2[*]
+
+compute 3 all reduce ave c_2[*]
+thermo_style custom step time temp press density pe ke etotal lx ly lz
+
+#dump 		4 all atom 100 excite.dump
+#dump_modify 4 first yes
+dump 4a all custom 10 excite.dump id type xs ys zs mol
+dump_modify 4a first yes
+
+#reset_timestep 0
+#Timestep
+timestep 0.01 # fs
+thermo 10 #every 100 in log files
+
+#NPT dynamics at 300.0 K with pressure to 1 atm
+log 		log/l_npt_ex.log

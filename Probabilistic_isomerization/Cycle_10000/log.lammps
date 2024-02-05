@@ -1,0 +1,6 @@
+LAMMPS (29 Sep 2021)
+#!/bin/bash
+#Single Azobenze molecule
+
+# Initialization
+log			log/l_init.log
