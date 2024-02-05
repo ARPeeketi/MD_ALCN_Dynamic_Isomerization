@@ -1,0 +1,51 @@
+#!/bin/bash
+#Single Azobenze molecule
+
+# Initialization
+log			log/l_init.log
+units		real
+boundary	p p p
+atom_style	full
+
+# Define styles
+pair_style lj/class2/coul/long 10
+#pair_style lj/class2 10
+bond_style class2
+angle_style class2
+dihedral_style class2
+improper_style class2
+
+kspace_style ewald 1.0e-4
+
+# Read in the azobenzene polymer chain lammps datafile
+read_data	M10D1A1_C25_t0.data
+group nitrogen type 2
+
+variable p internal 0.0
+variable cos equal cos(v_p)
+variable cossq equal cos(v_p)*cos(v_p)
+
+compute 1 all property/local datom1 datom2 datom3 datom4 dtype
+compute 2 all dihedral/local phi v_cos v_cossq set phi p
+
+dump 1 all local 1000 dump/dihed_*.dat c_1[*] c_2[*]
+
+compute 3 all reduce ave c_2[*]
+thermo_style custom step time temp press density pe ke etotal lx ly lz
+
+dump 		4 all custom 10000 excite.dump id type xs ys zs mol
+dump_modify 4 first yes
+
+#reset_timestep 0
+#Timestep
+timestep 0.1 # fs
+thermo 1 #every 100 in log files
+
+#NPT dynamics at 300.0 K with pressure to 1 atm
+log 		log/l_npt_ex.log
+fix 7 all npt temp 300.0 300.0 $(100.0*dt) aniso 1.0 1.0 $(1000.0*dt)
+run 2000000 # run for 100000 fs
+unfix 7
+print "NPT exc completed. "
+
+write_data M10D1A1_C25_t1.data
