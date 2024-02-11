@@ -4,7 +4,7 @@ The repository contains the LAMMPS and python scripts employed for molecular dyn
 The developed framework and the results are published online at [Arxiv](https://doi.org/10.48550/arXiv.2305.14990) "Photo-activated dynamic isomerization induced large density changes in liquid crystal polymers: A molecular dynamics study" Akhil Reddy Peeketi, Edwin Joseph, Narasimhan Swaminathan, Ratna Kumar Annabattula.
 
 
-Authors: Akhil Reddy Peeketi, Website: https://sites.google.com/view/akhilreddypeeketi/, Email: akhilreddy71196@gmail.com, Affiliation: Department of Mechanical Engineering, Indian Institute of Technology Madras, Chennai, INDIA.
+Authors: Akhil Reddy Peeketi, Website: https://www.arpeeketi.com/, Email: akhilreddy71196@gmail.com, Affiliation: Department of Mechanical Engineering, Indian Institute of Technology Madras, Chennai, INDIA.
 
 Narasimhan Swaminathan, Website: https://home.iitm.ac.in/n.swaminathan/, Email: n.swaminathan@iitm.ac.in, Affiliation: Department of Mechanical Engineering, Indian Institute of Technology Madras, Chennai, INDIA.
 
