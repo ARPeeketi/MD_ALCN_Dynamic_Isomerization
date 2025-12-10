@@ -87,26 +87,47 @@ try:
     z_top = slab.get_positions()[:, 2].max()
     z_bot = z_top + 1.0  # Start 1 Å above slab
     water_height = 15.0
-    z_top_water = z_bot + water_height
     
     # Generate water molecules
     n_waters = 500
     water_density = 1000  # kg/m³
+    
+    # Create list of water conformers
+    print("Generating water molecules...")
     waters = [smiles2conformers("O", 1)[0] for _ in range(n_waters)]
     
-    # Create box for packing
-    water_box_cell = np.array([
-        [cell[0, 0], 0, 0],
-        [0, cell[1, 1], 0],
-        [0, 0, water_height]
-    ])
+    # Calculate aspect ratio to match slab dimensions
+    # ratio = (x:y:z) where we want x and y to match slab, z for water height
+    x_dim = cell[0, 0]
+    y_dim = cell[1, 1]
     
-    # Pack waters
-    water_box = pack(waters, [1]*n_waters, density=water_density, 
-                     cell=water_box_cell)
-    water_box.set_cell(water_box_cell)
+    # Pack uses ratio, not absolute dimensions
+    # We'll pack and then scale to match slab xy dimensions
+    print("Packing water box with PACKMOL...")
+    water_box = pack([waters], [n_waters], density=water_density, 
+                     ratio=(x_dim/water_height, y_dim/water_height, 1.0),
+                     tolerance=2.0, verbose=False)
+    
+    # Scale the box to exactly match slab xy dimensions
+    packed_cell = water_box.get_cell()
+    scale_x = x_dim / packed_cell[0, 0]
+    scale_y = y_dim / packed_cell[1, 1]
+    
+    positions = water_box.get_positions()
+    positions[:, 0] *= scale_x
+    positions[:, 1] *= scale_y
+    water_box.set_positions(positions)
+    
+    # Update cell to match
+    new_cell = packed_cell.copy()
+    new_cell[0, 0] = x_dim
+    new_cell[1, 1] = y_dim
+    water_box.set_cell(new_cell)
     water_box.set_pbc([True, True, False])
-    water_box.translate([0, 0, z_bot])
+    
+    # Translate to position above slab
+    water_box.translate([0, 0, z_bot - water_box.get_positions()[:, 2].min()])
+    print(f"Water box created with {len(water_box)} atoms")
     
 except ImportError:
     print("molify not available, using simple water box")
